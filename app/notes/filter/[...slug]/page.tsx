@@ -15,7 +15,7 @@ interface PropsFilter {
 export async function generateMetadata({
   params,
 }: PropsFilter): Promise<Metadata> {
-  const { slug } = await params; // <-- обязательно await
+  const { slug } = await params;
 
   const tag = slug[0] === "all" ? "All notes" : slug[0];
   const title = `Notes filtered by: ${tag}`;
@@ -30,7 +30,11 @@ export async function generateMetadata({
       url: `https://your-vercel-domain.vercel.app/notes/filter/${slug.join(
         "/"
       )}`,
-      images: ["https://ac.goit.global/fullstack/react/notehub-og-meta.jpg"],
+      images: [
+        {
+          url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
+        },
+      ],
     },
   };
 }

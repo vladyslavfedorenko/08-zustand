@@ -17,7 +17,6 @@ export async function generateMetadata({
 }: NotePageProps): Promise<Metadata> {
   const { id } = params;
 
-  // Получаем данные заметки
   const note = await fetchNoteById(id);
 
   const shortDescription =
@@ -32,7 +31,11 @@ export async function generateMetadata({
       title: note.title,
       description: shortDescription,
       url: `https://your-vercel-domain.vercel.app/notes/${id}`,
-      images: ["https://ac.goit.global/fullstack/react/notehub-og-meta.jpg"],
+      images: [
+        {
+          url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
+        },
+      ],
     },
   };
 }

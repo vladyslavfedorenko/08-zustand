@@ -8,7 +8,7 @@ import { fetchNotes } from "@/lib/api";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import Link from "next/link";
 
 import css from "./NotesPage.module.css";
@@ -19,7 +19,10 @@ interface NotesClientProps {
 
 export default function NotesClient({ tag }: NotesClientProps) {
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
+
+  // 🔥 Разделяем ввод и значение для запроса
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const {
     data: response,
@@ -28,11 +31,11 @@ export default function NotesClient({ tag }: NotesClientProps) {
     isLoading,
     isFetching,
   } = useQuery({
-    queryKey: ["notes", search, page, tag],
+    queryKey: ["notes", searchQuery, page, tag],
     queryFn: () =>
       fetchNotes({
         page,
-        search: search || undefined,
+        search: searchQuery || undefined,
         tag: tag || undefined,
       }),
     placeholderData: keepPreviousData,
@@ -47,23 +50,26 @@ export default function NotesClient({ tag }: NotesClientProps) {
     }
   }, [response?.notes]);
 
+  // 🔥 Дебаунсим только значение для запроса
   const handleSearch = useDebouncedCallback((value: string) => {
-    setSearch(value);
+    setSearchQuery(value);
     setPage(1);
   }, 300);
 
   return (
     <>
       <section className={css.app}>
-        <Toaster />
-
         <div className={css.toolbar}>
           <SearchBox
-            search={search}
-            onChange={(e) => handleSearch(e.target.value)}
+            search={searchInput}
+            onChange={(e) => {
+              setSearchInput(e.target.value);
+              handleSearch(e.target.value);
+            }}
           />
 
-          {totalPages > 0 && (
+          {/* 🔥 Пагинация только если данные есть */}
+          {isSuccess && response.notes.length > 0 && totalPages > 0 && (
             <Pagination
               totalPages={totalPages}
               page={page}
@@ -71,7 +77,6 @@ export default function NotesClient({ tag }: NotesClientProps) {
             />
           )}
 
-          {/* Кнопка — теперь ссылка */}
           <Link href="/notes/action/create" className={css.button}>
             Create note +
           </Link>
